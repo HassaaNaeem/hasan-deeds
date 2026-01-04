@@ -15,6 +15,8 @@ import { useMyPlots } from '@/hooks/usePlots';
 import { useMyPayments } from '@/hooks/usePayments';
 import { PaymentInstallment, PaymentSchedule } from '@/types/entities';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 export default function PurchaserDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -76,6 +78,56 @@ export default function PurchaserDashboard() {
     return user.email.split('@')[0];
   }
 
+  // Get user image
+  // const getUserImage = () => {
+  //   if (!user) return undefined;
+  //   let uri = '';
+
+  //   if (user.purchaserId && typeof user.purchaserId !== 'string' && user.purchaserId?.imageUri) {
+  //     uri = user.purchaserId.imageUri;
+  //   } else if (user.serviceProviderId && typeof user.serviceProviderId !== 'string' && user.serviceProviderId?.imageUri) {
+  //     uri = user.serviceProviderId.imageUri;
+  //   }
+
+  //   if (uri) {
+  //     if (uri.startsWith('http')) return uri;
+  //     const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
+  //     console.log(baseUrl)
+  //     console.log(uri)
+  //     return `${baseUrl}/${uri}`;
+  //   }
+  //   return undefined;
+  // };
+
+  const getUserImage = () => {
+  if (!user) return undefined;
+  let uri = '';
+
+  if (user.purchaserId && typeof user.purchaserId !== 'string' && user.purchaserId?.imageUri) {
+    uri = user.purchaserId.imageUri;
+  } else if (user.serviceProviderId && typeof user.serviceProviderId !== 'string' && user.serviceProviderId?.imageUri) {
+    uri = user.serviceProviderId.imageUri;
+  }
+
+  if (uri) {
+    if (uri.startsWith('http')) return uri;
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
+    
+    // Remove leading slash from uri if it exists to avoid double slashes
+    const cleanUri = uri.startsWith('/') ? uri.slice(1) : uri;
+    const fullUrl = `${baseUrl}/${cleanUri}`;
+    
+    console.log('Full image URL:', fullUrl);
+    return fullUrl;
+  }
+  return undefined;
+};
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (plotsLoading || paymentsLoading) {
     return <AppLayout><div className="p-8">Loading dashboard...</div></AppLayout>;
   }
@@ -85,13 +137,21 @@ export default function PurchaserDashboard() {
       <div className="space-y-6">
         {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Welcome back, {getUserName().split(' ')[0]}!
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Here's an overview of your plots and payments
-            </p>
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16 border-2 border-primary/10">
+              <AvatarImage src={getUserImage()} className="object-cover" />
+              <AvatarFallback className="text-lg bg-primary/5 text-primary">
+                {getInitials(getUserName())}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Welcome back, {getUserName().split(' ')[0]}!
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Here's an overview of your plots and payments
+              </p>
+            </div>
           </div>
           <Button onClick={() => navigate('/purchaser/plots')}>
             Apply for New Plot

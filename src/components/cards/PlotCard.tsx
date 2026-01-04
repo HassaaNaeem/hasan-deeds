@@ -32,6 +32,14 @@ export function PlotCard({ plot, onClick, showMilestone = true, milestonePercent
     on_hold: 'On Hold',
   };
 
+  const getImageUrl = (uri?: string) => {
+    if (!uri) return undefined;
+    if (uri.startsWith('http')) return uri;
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
+    const cleanUri = uri.startsWith('/') ? uri.slice(1) : uri;
+    return `${baseUrl}/${cleanUri}`;
+  };
+
   return (
     <div
       className={cn(
@@ -41,6 +49,17 @@ export function PlotCard({ plot, onClick, showMilestone = true, milestonePercent
       )}
       onClick={onClick}
     >
+      {/* Plot Image */}
+      {plot.imageUri && (
+        <div className="w-full h-32 mb-3 rounded-lg overflow-hidden bg-muted">
+          <img 
+            src={getImageUrl(plot.imageUri)} 
+            alt={`Plot ${plot.plotNumber}`}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>

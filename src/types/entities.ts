@@ -50,6 +50,7 @@ export interface Plot {
   createdAt: string;
   updatedAt: string;
   plotDetails?: PlotDetails;
+  imageUri?: string;
 }
 
 export interface PlotDetails {

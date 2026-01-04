@@ -13,6 +13,7 @@ import PurchaserPlots from "./pages/purchaser/PurchaserPlots";
 import PlotApplication from "./pages/purchaser/PlotApplication";
 import PurchaserPayments from "./pages/purchaser/PurchaserPayments";
 import PurchaserDocuments from "./pages/purchaser/PurchaserDocuments";
+import PurchaserCases from "./pages/purchaser/PurchaserCases";
 import ServiceProviderDashboard from "./pages/serviceProvider/ServiceProviderDashboard";
 import WorkQueue from "./pages/serviceProvider/WorkQueue";
 import PaymentsMonitor from "./pages/serviceProvider/PaymentsMonitor";
@@ -66,6 +67,7 @@ function AppRoutes() {
       <Route path="/purchaser/apply/:plotId" element={<ProtectedRoute allowedRoles={['purchaser']}><PlotApplication /></ProtectedRoute>} />
       <Route path="/purchaser/payments" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserPayments /></ProtectedRoute>} />
       <Route path="/purchaser/documents" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserDocuments /></ProtectedRoute>} />
+      <Route path="/purchaser/cases" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserCases /></ProtectedRoute>} />
 
       {/* Service Provider Routes (Merged Admin Panel) */}
       <Route path="/service-provider" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><ServiceProviderDashboard /></ProtectedRoute>} />
@@ -84,16 +86,20 @@ function AppRoutes() {
   );
 }
 
+import { MockDataProvider } from "@/contexts/MockDataContext";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
+      <MockDataProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </MockDataProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

@@ -18,7 +18,8 @@ export default function RegisterPage() {
         name: '',
         cnicNumber: '',
         phoneNumber: '',
-        fatherName: '' // Required for purchaser
+        fatherName: '', // Required for purchaser
+        image: undefined as File | undefined,
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +28,17 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            await api.post('/auth/register', formData);
+            const data = new FormData();
+            Object.keys(formData).forEach(key => {
+                const value = formData[key as keyof typeof formData];
+                if (value !== undefined && value !== null && value !== '') {
+                    data.append(key, value as string | Blob);
+                }
+            });
+
+            await api.post('/auth/register', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             navigate('/'); // Redirect to login after successful registration
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Registration failed');
@@ -156,6 +167,16 @@ export default function RegisterPage() {
                                 />
                             </div>
                         )}
+
+                        <div className="space-y-2">
+                            <Label htmlFor="image">Profile Image</Label>
+                            <Input
+                                id="image"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] })}
+                            />
+                        </div>
 
                         {error && (
                             <div className="text-sm text-destructive font-medium text-center">

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from '@/components/NotificationCenter';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +28,7 @@ const purchaserNavItems = [
   { path: '/purchaser/plots', label: 'My Plots', icon: FileText },
   { path: '/purchaser/payments', label: 'Payments', icon: CreditCard },
   { path: '/purchaser/documents', label: 'Documents', icon: FolderOpen },
+  // { path: '/purchaser/cases', label: 'Legal Cases', icon: Scale },
 ];
 
 const serviceProviderNavItems = [
@@ -71,6 +72,25 @@ export function AppLayout({ children }: AppLayoutProps) {
 
     // Fallback to email username
     return user.email.split('@')[0] || 'User';
+  };
+
+  // Get user image
+  const getUserImage = () => {
+    if (!user) return undefined;
+    let uri = '';
+
+    if (user.purchaserId && typeof user.purchaserId !== 'string' && user.purchaserId?.imageUri) {
+      uri = user.purchaserId.imageUri;
+    } else if (user.serviceProviderId && typeof user.serviceProviderId !== 'string' && user.serviceProviderId?.imageUri) {
+      uri = user.serviceProviderId.imageUri;
+    }
+
+    if (uri) {
+      if (uri.startsWith('http')) return uri;
+      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
+      return `${baseUrl}/${uri}`;
+    }
+    return undefined;
   };
 
   const getInitials = (name?: string) => {
@@ -212,7 +232,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 {isPurchaser ? 'Purchaser Portal' : 'Admin Portal'}
               </h2>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Plot Purchase Management System
+                Real Estate Management System
               </p>
             </div>
           </div>
@@ -224,6 +244,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 px-2">
                   <Avatar className="w-8 h-8">
+                    <AvatarImage src={getUserImage()} className="object-cover" />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                       {getInitials(getUserName())}
                     </AvatarFallback>

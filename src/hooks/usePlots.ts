@@ -75,14 +75,17 @@ export function useCreatePlot() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (data: {
+        mutationFn: async (data: FormData | {
             plotNumber: string;
             area: string;
             location: string;
             totalValue: number;
             documentType?: string;
         }) => {
-            const response = await api.post<ApiResponse<Plot>>('/plots', data);
+            const config = data instanceof FormData 
+                ? { headers: { 'Content-Type': 'multipart/form-data' } }
+                : undefined;
+            const response = await api.post<ApiResponse<Plot>>('/plots', data, config);
             return response.data;
         },
         onSuccess: () => {

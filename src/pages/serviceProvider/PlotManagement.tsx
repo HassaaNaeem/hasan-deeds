@@ -35,6 +35,7 @@ export default function PlotManagement() {
         location: '',
         totalValue: '',
         documentType: '',
+        plotImage: undefined as File | undefined,
     });
 
     const handleCreatePlot = async () => {
@@ -43,14 +44,16 @@ export default function PlotManagement() {
             return;
         }
 
+        const formData = new FormData();
+        formData.append('plotNumber', plotData.plotNumber);
+        formData.append('area', plotData.area);
+        formData.append('location', plotData.location);
+        formData.append('totalValue', plotData.totalValue);
+        if (plotData.documentType) formData.append('documentType', plotData.documentType);
+        if (plotData.plotImage) formData.append('plotImage', plotData.plotImage);
+
         try {
-            await createPlotMutation.mutateAsync({
-                plotNumber: plotData.plotNumber,
-                area: plotData.area,
-                location: plotData.location,
-                totalValue: parseFloat(plotData.totalValue),
-                documentType: plotData.documentType || undefined,
-            });
+            await createPlotMutation.mutateAsync(formData);
             toast.success('Plot created successfully');
             setCreateDialog(false);
             setPlotData({
@@ -59,6 +62,7 @@ export default function PlotManagement() {
                 location: '',
                 totalValue: '',
                 documentType: '',
+                plotImage: undefined,
             });
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to create plot');
@@ -228,6 +232,16 @@ export default function PlotManagement() {
                                     value={plotData.documentType}
                                     onChange={(e) => setPlotData({ ...plotData, documentType: e.target.value })}
                                     placeholder="e.g., Freehold"
+                                    className="mt-1.5"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="plotImage">Plot Image</Label>
+                                <Input
+                                    id="plotImage"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setPlotData({ ...plotData, plotImage: e.target.files?.[0] })}
                                     className="mt-1.5"
                                 />
                             </div>

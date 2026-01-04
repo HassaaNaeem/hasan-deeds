@@ -1,7 +1,7 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BentoCard, BentoCardHeader } from '@/components/ui/bento-grid';
 import { Button } from '@/components/ui/button';
-import { useCases, useFileCase, useUpdateCaseStatus } from '@/hooks/useCases';
+import { useMockData } from '@/contexts/MockDataContext';
 import { useState } from 'react';
 import {
   Dialog,
@@ -14,13 +14,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Scale, AlertTriangle } from 'lucide-react';
+import { Loader2, Scale, AlertTriangle, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export default function CasesPanel() {
-  const { data: casesResponse, isLoading } = useCases();
-  const cases = casesResponse?.data || [];
+  const { failedPayments, fileCase } = useMockData();
+  
+  // In mock mode, we treat failedPayments as 'cases' source
+  const cases = failedPayments;
 
   const [fileDialog, setFileDialog] = useState<{
     open: boolean;
@@ -33,36 +35,29 @@ export default function CasesPanel() {
     description: '',
   });
 
-  const fileCaseMutation = useFileCase();
+  const [isFiling, setIsFiling] = useState(false);
 
   const handleFileCase = async () => {
     if (!fileDialog.failedPaymentId) return;
 
-    try {
-      await fileCaseMutation.mutateAsync({
-        failedPaymentId: fileDialog.failedPaymentId,
-        data: {
-          ...caseData,
-          amountCharged: parseFloat(caseData.amountCharged),
-        },
-      });
-      toast.success('Case filed successfully');
-      setFileDialog({ open: false });
-      setCaseData({ courtDate: '', chargeCode: '', amountCharged: '', description: '' });
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to file case');
-    }
+    setIsFiling(true);
+    // Simulate API delay
+    setTimeout(() => {
+        try {
+            fileCase(fileDialog.failedPaymentId!, {
+                ...caseData,
+                amountCharged: parseFloat(caseData.amountCharged),
+            });
+            toast.success('Case filed successfully');
+            setFileDialog({ open: false });
+            setCaseData({ courtDate: '', chargeCode: '', amountCharged: '', description: '' });
+        } catch (error: any) {
+            toast.error('Failed to file case');
+        } finally {
+            setIsFiling(false);
+        }
+    }, 1000);
   };
-
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </AppLayout>
-    );
-  }
 
   const recordedCases = cases.filter(c => c.status === 'recorded');
   const filedCases = cases.filter(c => c.status === 'filed' || c.status === 'in_progress');
@@ -72,9 +67,9 @@ export default function CasesPanel() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Cases Panel</h1>
+          <h1 className="text-2xl font-bold">Cases Panel (Mock)</h1>
           <p className="text-muted-foreground mt-1">
-            Manage legal cases for failed payments
+            Manage legal cases for failed payments (Demonstration Mode)
           </p>
         </div>
 
@@ -82,7 +77,7 @@ export default function CasesPanel() {
           {/* Recorded Cases */}
           <BentoCard>
             <BentoCardHeader
-              title="Recorded Cases"
+              title="Recorded Failed Payments"
               subtitle={`${recordedCases.length} pending filing`}
             />
             <div className="space-y-3">
@@ -94,7 +89,13 @@ export default function CasesPanel() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="font-medium text-sm">PKR {c.amount.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                            <User className="w-3 h-3"/> {c.purchaserName}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Plot: {c.plotNumber}
+                        </p>
+                        <p className="text-xs text-destructive mt-1">
                           Grace ends: {format(new Date(c.gracePeriodEnd), 'MMM d, yyyy')}
                         </p>
                       </div>
@@ -127,12 +128,18 @@ export default function CasesPanel() {
               ) : (
                 filedCases.map((c) => (
                   <div key={c._id} className="p-3 rounded-lg border border-purple-500/20 bg-purple-500/5">
-                    <p className="font-medium text-sm">Case #{c.caseId}</p>
+                    <div className="flex justify-between items-start">
+                        <p className="font-medium text-sm">Case #{c.caseId}</p>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full capitalize">{c.status}</span>
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Amount: PKR {c.amount.toLocaleString()}
+                      Against: {c.purchaserName} ({c.plotNumber})
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Amount: PKR {c.amount.toLocaleString()} + {c.amountCharged?.toLocaleString()} (Fees)
                     </p>
                     {c.courtDate && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Court: {format(new Date(c.courtDate), 'MMM d, yyyy')}
                       </p>
                     )}
@@ -172,7 +179,7 @@ export default function CasesPanel() {
             <DialogHeader>
               <DialogTitle>File Legal Case</DialogTitle>
               <DialogDescription>
-                Enter case details to file with the court
+                Enter case details to file with the court. This will mark the plot as ON HOLD.
               </DialogDescription>
             </DialogHeader>
 
@@ -198,7 +205,7 @@ export default function CasesPanel() {
                 />
               </div>
               <div>
-                <Label htmlFor="amountCharged">Amount Charged (PKR)</Label>
+                <Label htmlFor="amountCharged">Legal Fees / Charges (PKR)</Label>
                 <Input
                   id="amountCharged"
                   type="number"
@@ -223,14 +230,14 @@ export default function CasesPanel() {
               <Button variant="outline" onClick={() => setFileDialog({ open: false })}>
                 Cancel
               </Button>
-              <Button onClick={handleFileCase} disabled={fileCaseMutation.isPending}>
-                {fileCaseMutation.isPending ? (
+              <Button onClick={handleFileCase} disabled={isFiling}>
+                {isFiling ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Filing...
                   </>
                 ) : (
-                  'File Case'
+                  'File Case & Hold Plot'
                 )}
               </Button>
             </DialogFooter>
