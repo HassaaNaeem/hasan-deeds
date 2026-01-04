@@ -49,6 +49,7 @@ export interface Plot {
   dateOfSale?: string;
   createdAt: string;
   updatedAt: string;
+  plotDetails?: PlotDetails;
 }
 
 export interface PlotDetails {

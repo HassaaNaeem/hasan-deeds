@@ -239,15 +239,6 @@ export default function DocumentsIssuance() {
                   </BentoCard>
                   <BentoCard className="p-4">
                     <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-info" />
-                      <div>
-                        <p className="text-xl font-bold">{generatedDocs.length}</p>
-                        <p className="text-xs text-muted-foreground">Review</p>
-                      </div>
-                    </div>
-                  </BentoCard>
-                  <BentoCard className="p-4">
-                    <div className="flex items-center gap-3">
                       <CheckCircle2 className="w-5 h-5 text-success" />
                       <div>
                         <p className="text-xl font-bold">{approvedDocs.length}</p>
@@ -263,7 +254,7 @@ export default function DocumentsIssuance() {
                     <div>
                       <h3 className="font-semibold">Upload Milestone Document</h3>
                       <p className="text-sm text-muted-foreground">
-                        Upload a new milestone document for this plot
+                        Upload a new milestone document for this plot. It will be immediately issued to the purchaser.
                       </p>
                     </div>
                     <Button onClick={() => setManualUploadDialog({ ...manualUploadDialog, open: true })}>
@@ -298,53 +289,17 @@ export default function DocumentsIssuance() {
                   </BentoCard>
                 )}
 
-                {/* Generated & Pending Approval */}
-                {generatedDocs.length > 0 && (
-                  <BentoCard>
-                    <BentoCardHeader title="Uploaded (Pending Review)" subtitle="Documents ready for final approval" />
-                    <div className="divide-y divide-border">
-                      {generatedDocs.map((doc) => (
-                        <div key={doc._id} className="py-4 flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{MILESTONE_DOCS[doc.percentage]?.label || 'Document'}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Uploaded: {new Date(doc.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(doc.generatedUri || doc['uri' as keyof MilestoneDocument], '_blank')}
-                            >
-                              <Download className="w-4 h-4 mr-1" />
-                              View
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => setApprovalDialog({ open: true, document: doc, notes: '' })}
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-2" />
-                              Approve
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </BentoCard>
-                )}
-
                 {/* Approved Documents */}
                 {approvedDocs.length > 0 && (
                   <BentoCard>
-                    <BentoCardHeader title="Approved & Issued" subtitle="Documents issued to purchaser" />
+                    <BentoCardHeader title="Issued Documents" subtitle="Documents issued to purchaser" />
                     <div className="divide-y divide-border">
                       {approvedDocs.map((doc) => (
                         <div key={doc._id} className="py-4 flex items-center justify-between">
                           <div>
                             <p className="font-medium">{MILESTONE_DOCS[doc.percentage]?.label || 'Document'}</p>
                             <p className="text-sm text-success mt-1 flex items-center gap-1">
-                              <CheckCircle2 className="w-4 h-4" /> Approved on {new Date(doc.updatedAt).toLocaleDateString()}
+                              <CheckCircle2 className="w-4 h-4" /> Issued on {new Date(doc.updatedAt).toLocaleDateString()}
                             </p>
                           </div>
                           <Button

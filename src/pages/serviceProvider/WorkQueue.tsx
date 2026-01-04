@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { BentoCard, BentoCardHeader } from '@/components/ui/bento-grid';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { BentoCard, BentoCardHeader } from "@/components/ui/bento-grid";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -11,20 +11,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePlots } from "@/hooks/usePlots";
+import { useVerifyDocuments, usePlotDocuments } from "@/hooks/useDocuments";
+import { useCreatePaymentSchedule } from "@/hooks/usePayments";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { usePlots } from '@/hooks/usePlots';
-import { useVerifyDocuments, usePlotDocuments } from '@/hooks/useDocuments';
-import { useCreatePaymentSchedule } from '@/hooks/usePayments';
-import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, CheckCircle2, XCircle, Clock, CreditCard, Trash2, FileText, ChevronRight, ExternalLink, Download } from 'lucide-react';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  CreditCard,
+  Trash2,
+  FileText,
+  ChevronRight,
+  ExternalLink,
+  Download,
+} from "lucide-react";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 function PlotDocumentsView({ plotId }: { plotId: string }) {
   const { data: response, isLoading } = usePlotDocuments(plotId);
@@ -39,18 +45,26 @@ function PlotDocumentsView({ plotId }: { plotId: string }) {
   }
 
   if (!details) {
-    return <p className="text-sm text-muted-foreground text-center py-4">No documents found for this plot.</p>;
+    return (
+      <p className="text-sm text-muted-foreground text-center py-4">
+        No documents found for this plot.
+      </p>
+    );
   }
 
   const docs = [
-    { label: 'CNIC Copy', uri: details.purchaserCnicCopyUri },
-    { label: 'Site Plan / Mpa', uri: details.plotMapUri },
-    { label: 'Bank Statement', uri: details.purchaserBankStatementUri },
-    { label: 'Company Form', uri: details.companyFormUri },
-  ].filter(d => d.uri);
+    { label: "CNIC Copy", uri: details.purchaserCnicCopyUri },
+    { label: "Site Plan / Mpa", uri: details.plotMapUri },
+    { label: "Bank Statement", uri: details.purchaserBankStatementUri },
+    { label: "Company Form", uri: details.companyFormUri },
+  ].filter((d) => d.uri);
 
   if (docs.length === 0) {
-    return <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded yet.</p>;
+    return (
+      <p className="text-sm text-muted-foreground text-center py-4">
+        No documents uploaded yet.
+      </p>
+    );
   }
 
   return (
@@ -58,9 +72,16 @@ function PlotDocumentsView({ plotId }: { plotId: string }) {
       <Label>Submitted Documents</Label>
       <div className="grid grid-cols-1 gap-2">
         {docs.map((doc, idx) => (
-          <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+          <div
+            key={idx}
+            className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
+          >
             <span className="text-sm font-medium">{doc.label}</span>
-            <Button variant="outline" size="sm" onClick={() => window.open(doc.uri, '_blank')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(doc.uri, "_blank")}
+            >
               <ExternalLink className="w-4 h-4 mr-2" />
               View
             </Button>
@@ -75,7 +96,7 @@ export default function WorkQueue() {
   const { user } = useAuth();
   // Service providers need to see ALL reserved plots, not just their own
   // Use usePlots to get all reserved plots
-  const { data: plotsResponse, isLoading } = usePlots({ status: 'reserved' });
+  const { data: plotsResponse, isLoading } = usePlots({ status: "reserved" });
   const plots = plotsResponse?.data || [];
 
   const [verifyDialog, setVerifyDialog] = useState<{
@@ -84,7 +105,9 @@ export default function WorkQueue() {
     plotNumber?: string;
     plotValue?: number;
   }>({ open: false });
-  const [verifyStatus, setVerifyStatus] = useState<'verified' | 'rejected'>('verified');
+  const [verifyStatus, setVerifyStatus] = useState<"verified" | "rejected">(
+    "verified"
+  );
 
   const [scheduleDialog, setScheduleDialog] = useState<{
     open: boolean;
@@ -95,10 +118,10 @@ export default function WorkQueue() {
 
   // Fixed milestones: 10%, 50%, 75%, 100%
   const MILESTONES = [
-    { percentage: 10, label: 'Allotment', docType: 'ALLOTMENT' },
-    { percentage: 50, label: 'Allocation', docType: 'ALLOCATION' },
-    { percentage: 75, label: 'Possession', docType: 'POSSESSION' },
-    { percentage: 100, label: 'Clearance', docType: 'CLEARANCE' },
+    { percentage: 10, label: "Allotment", docType: "ALLOTMENT" },
+    { percentage: 50, label: "Allocation", docType: "ALLOCATION" },
+    { percentage: 75, label: "Possession", docType: "POSSESSION" },
+    { percentage: 100, label: "Clearance", docType: "CLEARANCE" },
   ];
 
   const [milestoneDueDates, setMilestoneDueDates] = useState<
@@ -108,18 +131,23 @@ export default function WorkQueue() {
   const verifyMutation = useVerifyDocuments();
   const createScheduleMutation = useCreatePaymentSchedule();
 
-  // For now, show all reserved plots as pending
-  // The backend should ideally return plot details with each plot
-  // or we need a separate endpoint to get plots with their verification status
-  const pendingPlots = plots;
+  // Filter plots based on verification status from plotDetails
+  // pendingPlots includes plots where verification is pending, uploaded, or rejected
+  const pendingPlots = plots.filter(
+    (p) =>
+      !p.plotDetails?.status ||
+      ["pending", "uploaded", "rejected"].includes(p.plotDetails.status)
+  );
 
-  // Verified plots would need to be fetched separately or filtered based on plot details
-  // For now, we'll keep this empty until we have proper backend support
-  const verifiedPlots: typeof plots = [];
+  // Verified plots are only those with status 'verified'
+  const verifiedPlots = plots.filter(
+    (p) => p.plotDetails?.status === "verified"
+  );
+  // const [verifiedPlots, setVerifiedPlots] = useState()
 
   const handleVerify = async () => {
     if (!verifyDialog.plotId || !user?.serviceProviderId) {
-      toast.error('Missing required information');
+      toast.error("Missing required information");
       return;
     }
 
@@ -127,28 +155,38 @@ export default function WorkQueue() {
       await verifyMutation.mutateAsync({
         plotId: verifyDialog.plotId,
         status: verifyStatus,
-        serviceProviderId: typeof user.serviceProviderId === 'string'
-          ? user.serviceProviderId
-          : user.serviceProviderId._id,
+        serviceProviderId:
+          typeof user.serviceProviderId === "string"
+            ? user.serviceProviderId
+            : user.serviceProviderId._id,
       });
-      toast.success(`Documents ${verifyStatus === 'verified' ? 'verified' : 'rejected'} successfully`);
+      toast.success(
+        `Documents ${
+          verifyStatus === "verified" ? "verified" : "rejected"
+        } successfully`
+      );
 
       // If verified, show payment schedule dialog
-      if (verifyStatus === 'verified') {
+      ///////////////////////////
+      ///////////////////////////
+      ///////////////////////////
+      ///////////////////////////
+      ///////////////////////////
+      if (verifyStatus === "verified") {
         setScheduleDialog({
           open: true,
           plotId: verifyDialog.plotId,
           plotNumber: verifyDialog.plotNumber,
           plotValue: verifyDialog.plotValue,
         });
-        setMilestoneDueDates(
-          MILESTONES.map(m => ({ ...m, dueDate: '' }))
-        );
+        setMilestoneDueDates(MILESTONES.map((m) => ({ ...m, dueDate: "" })));
       }
 
       setVerifyDialog({ open: false });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to verify documents');
+      toast.error(
+        error.response?.data?.message || "Failed to verify documents"
+      );
     }
   };
 
@@ -160,13 +198,13 @@ export default function WorkQueue() {
 
   const handleCreateSchedule = async () => {
     if (!scheduleDialog.plotId || !scheduleDialog.plotValue) {
-      toast.error('Missing plot information');
+      toast.error("Missing plot information");
       return;
     }
 
-    const missingDates = milestoneDueDates.some(m => !m.dueDate);
+    const missingDates = milestoneDueDates.some((m) => !m.dueDate);
     if (missingDates) {
-      toast.error('All milestone due dates are required');
+      toast.error("All milestone due dates are required");
       return;
     }
 
@@ -181,11 +219,15 @@ export default function WorkQueue() {
       };
 
       await createScheduleMutation.mutateAsync(scheduleData);
-      toast.success('Payment schedule created successfully! Document generation will trigger at each milestone.');
+      toast.success(
+        "Payment schedule created successfully! Document generation will trigger at each milestone."
+      );
       setScheduleDialog({ open: false });
       setMilestoneDueDates([]);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create payment schedule');
+      toast.error(
+        error.response?.data?.message || "Failed to create payment schedule"
+      );
     }
   };
 
@@ -211,7 +253,7 @@ export default function WorkQueue() {
 
         <BentoCard
           className="bg-primary/5 border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors"
-          onClick={() => window.location.href = '/service-provider/documents'}
+          onClick={() => (window.location.href = "/service-provider/documents")}
         >
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-4">
@@ -219,9 +261,12 @@ export default function WorkQueue() {
                 <FileText className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Manage Milestone Documents</h3>
+                <h3 className="font-semibold text-lg">
+                  Manage Milestone Documents
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Issue allotment, allocation, and possession documents for active plots
+                  Issue allotment, allocation, and possession documents for
+                  active plots
                 </p>
               </div>
             </div>
@@ -247,12 +292,18 @@ export default function WorkQueue() {
               ) : (
                 <div className="divide-y divide-border">
                   {pendingPlots.map((plot) => (
-                    <div key={plot._id} className="py-4 flex items-center justify-between">
+                    <div
+                      key={plot._id}
+                      className="py-4 flex items-center justify-between"
+                    >
                       <div>
                         <p className="font-medium">Plot {plot.plotNumber}</p>
-                        <p className="text-sm text-muted-foreground">{plot.location}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {plot.location}
+                        </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Area: {plot.area} • Value: PKR {plot.totalValue.toLocaleString()}
+                          Area: {plot.area} • Value: PKR{" "}
+                          {plot.totalValue.toLocaleString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -280,7 +331,10 @@ export default function WorkQueue() {
 
           <TabsContent value="verified" className="mt-4">
             <BentoCard>
-              <BentoCardHeader title="Verified Plots" subtitle="Applications with verified documents" />
+              <BentoCardHeader
+                title="Verified Plots"
+                subtitle="Applications with verified documents"
+              />
               {verifiedPlots.length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">
                   No verified plots found
@@ -288,19 +342,30 @@ export default function WorkQueue() {
               ) : (
                 <div className="divide-y divide-border">
                   {verifiedPlots.map((plot) => (
-                    <div key={plot._id} className="py-4 flex items-center justify-between">
+                    <div
+                      key={plot._id}
+                      className="py-4 flex items-center justify-between"
+                    >
                       <div>
                         <p className="font-medium">Plot {plot.plotNumber}</p>
-                        <p className="text-sm text-muted-foreground">{plot.location}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {plot.location}
+                        </p>
                         <p className="text-sm text-success mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Documents Verified
+                          <CheckCircle2 className="w-3 h-3" /> Documents
+                          Verified
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(`/service-provider/documents?plotId=${plot._id}`, '_self')}
+                          onClick={() =>
+                            window.open(
+                              `/service-provider/documents?plotId=${plot._id}`,
+                              "_self"
+                            )
+                          }
                         >
                           Manage Documents
                         </Button>
@@ -314,7 +379,10 @@ export default function WorkQueue() {
         </Tabs>
 
         {/* Verify Dialog */}
-        <Dialog open={verifyDialog.open} onOpenChange={(open) => setVerifyDialog({ open })}>
+        <Dialog
+          open={verifyDialog.open}
+          onOpenChange={(open) => setVerifyDialog({ open })}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Verify Documents</DialogTitle>
@@ -324,23 +392,29 @@ export default function WorkQueue() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {verifyDialog.plotId && <PlotDocumentsView plotId={verifyDialog.plotId} />}
+              {verifyDialog.plotId && (
+                <PlotDocumentsView plotId={verifyDialog.plotId} />
+              )}
 
               <div className="pt-4 border-t">
                 <Label>Verification Decision</Label>
                 <div className="flex gap-2 mt-2">
                   <Button
-                    variant={verifyStatus === 'verified' ? 'default' : 'outline'}
+                    variant={
+                      verifyStatus === "verified" ? "default" : "outline"
+                    }
                     className="flex-1"
-                    onClick={() => setVerifyStatus('verified')}
+                    onClick={() => setVerifyStatus("verified")}
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
                     Approve
                   </Button>
                   <Button
-                    variant={verifyStatus === 'rejected' ? 'destructive' : 'outline'}
+                    variant={
+                      verifyStatus === "rejected" ? "destructive" : "outline"
+                    }
                     className="flex-1"
-                    onClick={() => setVerifyStatus('rejected')}
+                    onClick={() => setVerifyStatus("rejected")}
                   >
                     <XCircle className="w-4 h-4 mr-2" />
                     Reject
@@ -350,17 +424,23 @@ export default function WorkQueue() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setVerifyDialog({ open: false })}>
+              <Button
+                variant="outline"
+                onClick={() => setVerifyDialog({ open: false })}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleVerify} disabled={verifyMutation.isPending}>
+              <Button
+                onClick={handleVerify}
+                disabled={verifyMutation.isPending}
+              >
                 {verifyMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Submitting...
                   </>
                 ) : (
-                  'Submit Verification'
+                  "Submit Verification"
                 )}
               </Button>
             </DialogFooter>
@@ -368,7 +448,10 @@ export default function WorkQueue() {
         </Dialog>
 
         {/* Payment Schedule Dialog */}
-        <Dialog open={scheduleDialog.open} onOpenChange={(open) => setScheduleDialog({ open: false })}>
+        <Dialog
+          open={scheduleDialog.open}
+          onOpenChange={(open) => setScheduleDialog({ open: false })}
+        >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -376,9 +459,11 @@ export default function WorkQueue() {
                 Create Payment Schedule
               </DialogTitle>
               <DialogDescription>
-                Set up installment milestones for Plot {scheduleDialog.plotNumber}
+                Set up installment milestones for Plot{" "}
+                {scheduleDialog.plotNumber}
                 <div className="mt-2 text-sm font-medium text-foreground">
-                  Total Plot Value: PKR {scheduleDialog.plotValue?.toLocaleString()}
+                  Total Plot Value: PKR{" "}
+                  {scheduleDialog.plotValue?.toLocaleString()}
                 </div>
               </DialogDescription>
             </DialogHeader>
@@ -398,12 +483,18 @@ export default function WorkQueue() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-xs text-muted-foreground">Amount</Label>
+                        <Label className="text-xs text-muted-foreground">
+                          Amount
+                        </Label>
                         <div className="mt-1 p-2 rounded bg-muted/50 text-sm font-medium">
-                          PKR{' '}
+                          PKR{" "}
                           {scheduleDialog.plotValue
-                            ? Math.round((scheduleDialog.plotValue * milestone.percentage) / 100).toLocaleString()
-                            : '0'}
+                            ? Math.round(
+                                (scheduleDialog.plotValue *
+                                  milestone.percentage) /
+                                  100
+                              ).toLocaleString()
+                            : "0"}
                         </div>
                       </div>
                       <div>
@@ -411,7 +502,9 @@ export default function WorkQueue() {
                         <Input
                           type="date"
                           value={milestone.dueDate}
-                          onChange={(e) => handleMilestoneDateChange(index, e.target.value)}
+                          onChange={(e) =>
+                            handleMilestoneDateChange(index, e.target.value)
+                          }
                           className="mt-1"
                         />
                       </div>
@@ -422,13 +515,18 @@ export default function WorkQueue() {
 
               <div className="p-3 rounded-lg bg-info/10 border border-info/20">
                 <p className="text-xs text-info">
-                  ℹ When the purchaser reaches each milestone payment, a corresponding document will be automatically generated and prepared for your review.
+                  ℹ When the purchaser reaches each milestone payment, a
+                  corresponding document will be automatically generated and
+                  prepared for your review.
                 </p>
               </div>
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setScheduleDialog({ open: false })}>
+              <Button
+                variant="outline"
+                onClick={() => setScheduleDialog({ open: false })}
+              >
                 Cancel
               </Button>
               <Button

@@ -79,6 +79,7 @@ export function useVerifyDocuments() {
             queryClient.invalidateQueries({ queryKey: ['plot-documents', variables.plotId] });
             queryClient.invalidateQueries({ queryKey: ['plot', variables.plotId] });
             queryClient.invalidateQueries({ queryKey: ['my-plots'] });
+            queryClient.invalidateQueries({ queryKey: ['plots'] });
         },
     });
 }

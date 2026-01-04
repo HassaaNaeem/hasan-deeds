@@ -34,7 +34,7 @@ function PlotDocumentCard({ plotId, plotNumber, location, details, onViewDocumen
 
   const paymentPercentage = progressData?.data?.percentage || 0;
   const milestoneDocuments = milestoneData?.data?.documents || [];
-  const approvedDocs = milestoneDocuments.filter(d => d.status === 'approved');
+  const visibleDocs = milestoneDocuments.filter(d => d.status === 'approved' || d.status === 'generated');
 
   return (
     <BentoCard>
@@ -61,7 +61,7 @@ function PlotDocumentCard({ plotId, plotNumber, location, details, onViewDocumen
 
       <Tabs defaultValue="issued" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="issued">Milestone Documents ({approvedDocs.length})</TabsTrigger>
+          <TabsTrigger value="issued">Milestone Documents ({visibleDocs.length})</TabsTrigger>
           <TabsTrigger value="submitted">Submitted Documents</TabsTrigger>
         </TabsList>
 
@@ -71,18 +71,18 @@ function PlotDocumentCard({ plotId, plotNumber, location, details, onViewDocumen
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
-            ) : approvedDocs.length > 0 ? (
+            ) : visibleDocs.length > 0 ? (
               <>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Documents issued at each payment milestone
+                  Documents related to your payment milestones
                 </p>
-                {approvedDocs.map((doc) => (
+                {visibleDocs.map((doc) => (
                   <UploadedDocumentCard
                     key={doc._id}
                     title={MILESTONE_LABELS[doc.percentage] || 'Document'}
                     fileName={doc.generatedUri?.split('/').pop() || 'document.pdf'}
                     uploadedAt={new Date(doc.approvedAt || doc.createdAt).toLocaleDateString()}
-                    status="verified"
+                    status={doc.status === 'approved' ? 'verified' : 'uploaded'}
                     onView={() => onViewDocument(doc._id, doc.generatedUri)}
                   />
                 ))}
