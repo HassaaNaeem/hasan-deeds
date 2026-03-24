@@ -77,14 +77,14 @@ function PlotDocumentsView({ plotId }: { plotId: string }) {
             className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
           >
             <span className="text-sm font-medium">{doc.label}</span>
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={() => window.open(doc.uri, "_blank")}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View
-            </Button>
+            </Button> */}
           </div>
         ))}
       </div>
@@ -131,19 +131,13 @@ export default function WorkQueue() {
   const verifyMutation = useVerifyDocuments();
   const createScheduleMutation = useCreatePaymentSchedule();
 
-  // Filter plots based on verification status from plotDetails
-  // pendingPlots includes plots where verification is pending, uploaded, or rejected
+  // Filter plots based on verification status
   const pendingPlots = plots.filter(
-    (p) =>
-      !p.plotDetails?.status ||
-      ["pending", "uploaded", "rejected"].includes(p.plotDetails.status)
+    (plot) => plot.plotDetails?.status !== "verified"
   );
-
-  // Verified plots are only those with status 'verified'
   const verifiedPlots = plots.filter(
-    (p) => p.plotDetails?.status === "verified"
+    (plot) => plot.plotDetails?.status === "verified"
   );
-  // const [verifiedPlots, setVerifiedPlots] = useState()
 
   const handleVerify = async () => {
     if (!verifyDialog.plotId || !user?.serviceProviderId) {

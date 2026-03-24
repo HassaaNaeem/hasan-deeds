@@ -1,11 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Create an axios instance with default config
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3002/api',
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   withCredentials: true, // Important for cookies
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -17,5 +17,5 @@ api.interceptors.response.use(
       // Logic to handle 401 if needed globally, but mostly handled in AuthContext
     }
     return Promise.reject(error);
-  }
+  },
 );
