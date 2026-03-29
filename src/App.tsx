@@ -23,9 +23,22 @@ import AuditLogPage from "./pages/serviceProvider/AuditLogPage";
 import PlotManagement from "./pages/serviceProvider/PlotManagement";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
+function ProtectedRoute({
+  children,
+  allowedRoles,
+}: {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}) {
   const { user, isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
@@ -51,35 +64,143 @@ function AppRoutes() {
   }
 
   const getDefaultRoute = () => {
-    if (!user) return '/';
+    if (!user) return "/";
     // Align with UserRole: 'purchaser' | 'service_provider' | 'admin' | 'legal'
-    return user.role === 'purchaser' ? '/purchaser' : '/service-provider';
+    return user.role === "purchaser" ? "/purchaser" : "/service-provider";
   };
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to={getDefaultRoute()} /> : <LoginPage />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to={getDefaultRoute()} /> : <RegisterPage />} />
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? <Navigate to={getDefaultRoute()} /> : <LoginPage />
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          isAuthenticated ? (
+            <Navigate to={getDefaultRoute()} />
+          ) : (
+            <RegisterPage />
+          )
+        }
+      />
 
       {/* Purchaser Routes */}
-      <Route path="/purchaser" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserDashboard /></ProtectedRoute>} />
-      <Route path="/purchaser/plots" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserPlots /></ProtectedRoute>} />
-      <Route path="/purchaser/apply/:plotId" element={<ProtectedRoute allowedRoles={['purchaser']}><PlotApplication /></ProtectedRoute>} />
-      <Route path="/purchaser/payments" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserPayments /></ProtectedRoute>} />
-      <Route path="/purchaser/documents" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserDocuments /></ProtectedRoute>} />
-      <Route path="/purchaser/cases" element={<ProtectedRoute allowedRoles={['purchaser']}><PurchaserCases /></ProtectedRoute>} />
+      <Route
+        path="/purchaser"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PurchaserDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchaser/plots"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PurchaserPlots />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchaser/apply/:plotId"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PlotApplication />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchaser/payments"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PurchaserPayments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchaser/documents"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PurchaserDocuments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchaser/cases"
+        element={
+          <ProtectedRoute allowedRoles={["purchaser"]}>
+            <PurchaserCases />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Service Provider Routes (Merged Admin Panel) */}
-      <Route path="/service-provider" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><ServiceProviderDashboard /></ProtectedRoute>} />
-      <Route path="/service-provider/plots" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><PlotManagement /></ProtectedRoute>} />
-      <Route path="/service-provider/work-queue" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><WorkQueue /></ProtectedRoute>} />
-      <Route path="/service-provider/payments" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><PaymentsMonitor /></ProtectedRoute>} />
-      <Route path="/service-provider/cases" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><CasesPanel /></ProtectedRoute>} />
-      <Route path="/service-provider/documents" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><DocumentsIssuance /></ProtectedRoute>} />
-      <Route path="/service-provider/audit-log" element={<ProtectedRoute allowedRoles={['service_provider', 'legal', 'admin']}><AuditLogPage /></ProtectedRoute>} />
+      <Route
+        path="/service-provider"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <ServiceProviderDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/plots"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <PlotManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/work-queue"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <WorkQueue />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/payments"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <PaymentsMonitor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/cases"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <CasesPanel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/documents"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <DocumentsIssuance />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider/audit-log"
+        element={
+          <ProtectedRoute allowedRoles={["service_provider", "legal", "admin"]}>
+            <AuditLogPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Legacy admin routes redirect */}
-      <Route path="/admin/*" element={<Navigate to="/service-provider" replace />} />
+      <Route
+        path="/admin/*"
+        element={<Navigate to="/service-provider" replace />}
+      />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
