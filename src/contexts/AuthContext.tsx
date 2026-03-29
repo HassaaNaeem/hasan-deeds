@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials,
     );
     if (response.data.success && response.data.data) {
-      setUser(response.data.data);
+      await checkAuth();
       // If token is returned in generic way, api.ts interceptor might handle it,
       // but we rely on httpOnly cookie for subsequent requests as per auth.md
     } else {

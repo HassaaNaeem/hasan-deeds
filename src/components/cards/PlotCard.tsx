@@ -1,9 +1,12 @@
-import { MapPin, Maximize2, Tag } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Plot } from '@/types/entities';
-import { StatusBadge, getPlotStatusVariant } from '@/components/ui/status-badge';
-import { MilestoneProgress } from '@/components/ui/milestone-progress';
-import { Button } from '@/components/ui/button';
+import { MapPin, Maximize2, Tag } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Plot } from "@/types/entities";
+import {
+  StatusBadge,
+  getPlotStatusVariant,
+} from "@/components/ui/status-badge";
+import { MilestoneProgress } from "@/components/ui/milestone-progress";
+import { Button } from "@/components/ui/button";
 
 interface PlotCardProps {
   plot: Plot;
@@ -13,8 +16,17 @@ interface PlotCardProps {
   className?: string;
 }
 
-export function PlotCard({ plot, onClick, showMilestone = true, milestonePercentage = 0, className }: PlotCardProps) {
-  const milestone = { percentage: milestonePercentage, level: milestonePercentage as 0 | 10 | 50 | 75 | 100 };
+export function PlotCard({
+  plot,
+  onClick,
+  showMilestone = true,
+  milestonePercentage = 0,
+  className,
+}: PlotCardProps) {
+  const milestone = {
+    percentage: milestonePercentage,
+    level: milestonePercentage as 0 | 10 | 50 | 75 | 100,
+  };
 
   const formatPrice = (price: number) => {
     if (price >= 10000000) {
@@ -26,34 +38,28 @@ export function PlotCard({ plot, onClick, showMilestone = true, milestonePercent
   };
 
   const statusLabels: Record<string, string> = {
-    available: 'Available',
-    reserved: 'Reserved',
-    sold: 'Sold',
-    on_hold: 'On Hold',
+    available: "Available",
+    reserved: "Reserved",
+    sold: "Sold",
+    on_hold: "On Hold",
   };
 
   const getImageUrl = (uri?: string) => {
     if (!uri) return undefined;
-    if (uri.startsWith('http')) return uri;
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3002';
-    const cleanUri = uri.startsWith('/') ? uri.slice(1) : uri;
-    return `${baseUrl}/${cleanUri}`;
+    if (uri.startsWith("http")) return uri;
+    return undefined;
   };
 
   return (
     <div
-      className={cn(
-        'bento-card group',
-        onClick && 'cursor-pointer',
-        className
-      )}
+      className={cn("bento-card group", onClick && "cursor-pointer", className)}
       onClick={onClick}
     >
       {/* Plot Image */}
       {plot.imageUri && (
         <div className="w-full h-32 mb-3 rounded-lg overflow-hidden bg-muted">
-          <img 
-            src={getImageUrl(plot.imageUri)} 
+          <img
+            src={getImageUrl(plot.imageUri)}
             alt={`Plot ${plot.plotNumber}`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
@@ -93,7 +99,9 @@ export function PlotCard({ plot, onClick, showMilestone = true, milestonePercent
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Total Value</p>
-            <p className="text-sm font-medium">{formatPrice(plot.totalValue)}</p>
+            <p className="text-sm font-medium">
+              {formatPrice(plot.totalValue)}
+            </p>
           </div>
         </div>
       </div>

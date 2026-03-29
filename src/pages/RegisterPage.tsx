@@ -196,15 +196,17 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* <div className="space-y-2">
-                            <Label htmlFor="image">Profile Image</Label>
-                            <Input
-                                id="image"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] })}
-                            />
-                        </div> */}
+            <div className="space-y-2">
+              <Label htmlFor="image">Profile Image</Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.files?.[0] })
+                }
+              />
+            </div>
 
             {error && (
               <div className="text-sm text-destructive font-medium text-center">
