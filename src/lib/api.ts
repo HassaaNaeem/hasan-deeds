@@ -4,7 +4,7 @@ import axios from "axios";
 export const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    "https://real-estate-management-backend.vercel.app/api",
+    "https://real-estate-backend-blond.vercel.app/api",
   withCredentials: true, // Important for cookies
   headers: {
     "Content-Type": "application/json",
