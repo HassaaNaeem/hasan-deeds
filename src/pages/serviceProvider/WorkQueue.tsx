@@ -77,14 +77,14 @@ function PlotDocumentsView({ plotId }: { plotId: string }) {
             className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
           >
             <span className="text-sm font-medium">{doc.label}</span>
-            {/* <Button
+            <Button
               variant="outline"
               size="sm"
               onClick={() => window.open(doc.uri, "_blank")}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View
-            </Button> */}
+            </Button>
           </div>
         ))}
       </div>
@@ -106,7 +106,7 @@ export default function WorkQueue() {
     plotValue?: number;
   }>({ open: false });
   const [verifyStatus, setVerifyStatus] = useState<"verified" | "rejected">(
-    "verified"
+    "verified",
   );
 
   const [scheduleDialog, setScheduleDialog] = useState<{
@@ -133,10 +133,10 @@ export default function WorkQueue() {
 
   // Filter plots based on verification status
   const pendingPlots = plots.filter(
-    (plot) => plot.plotDetails?.status !== "verified"
+    (plot) => plot.plotDetails?.status !== "verified",
   );
   const verifiedPlots = plots.filter(
-    (plot) => plot.plotDetails?.status === "verified"
+    (plot) => plot.plotDetails?.status === "verified",
   );
 
   const handleVerify = async () => {
@@ -157,7 +157,7 @@ export default function WorkQueue() {
       toast.success(
         `Documents ${
           verifyStatus === "verified" ? "verified" : "rejected"
-        } successfully`
+        } successfully`,
       );
 
       // If verified, show payment schedule dialog
@@ -179,7 +179,7 @@ export default function WorkQueue() {
       setVerifyDialog({ open: false });
     } catch (error: any) {
       toast.error(
-        error.response?.data?.message || "Failed to verify documents"
+        error.response?.data?.message || "Failed to verify documents",
       );
     }
   };
@@ -214,13 +214,13 @@ export default function WorkQueue() {
 
       await createScheduleMutation.mutateAsync(scheduleData);
       toast.success(
-        "Payment schedule created successfully! Document generation will trigger at each milestone."
+        "Payment schedule created successfully! Document generation will trigger at each milestone.",
       );
       setScheduleDialog({ open: false });
       setMilestoneDueDates([]);
     } catch (error: any) {
       toast.error(
-        error.response?.data?.message || "Failed to create payment schedule"
+        error.response?.data?.message || "Failed to create payment schedule",
       );
     }
   };
@@ -245,7 +245,7 @@ export default function WorkQueue() {
           </p>
         </div>
 
-        <BentoCard
+        {/* <BentoCard
           className="bg-primary/5 border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors"
           onClick={() => (window.location.href = "/service-provider/documents")}
         >
@@ -266,7 +266,7 @@ export default function WorkQueue() {
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </div>
-        </BentoCard>
+        </BentoCard> */}
 
         <Tabs defaultValue="pending">
           <TabsList>
@@ -357,7 +357,7 @@ export default function WorkQueue() {
                           onClick={() =>
                             window.open(
                               `/service-provider/documents?plotId=${plot._id}`,
-                              "_self"
+                              "_self",
                             )
                           }
                         >
@@ -486,7 +486,7 @@ export default function WorkQueue() {
                             ? Math.round(
                                 (scheduleDialog.plotValue *
                                   milestone.percentage) /
-                                  100
+                                  100,
                               ).toLocaleString()
                             : "0"}
                         </div>
